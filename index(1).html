@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Momentum Machine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Archivo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #4a3f2e;
+            --bg-card: #5c4f39;
+            --accent-primary: #ff8c42;
+            --accent-secondary: #ffb865;
+            --accent-red: #fb2e01;
+            --accent-teal: #6fcb9f;
+            --text-primary: #fffeb3;
+            --text-secondary: #ffb865;
+            --border: #6b5d47;
+            --success: #6fcb9f;
+            --warning: #fb2e01;
+        }
+
+        body {
+            font-family: 'Archivo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(at 20% 30%, rgba(255, 140, 66, 0.12) 0px, transparent 50%),
+                radial-gradient(at 80% 70%, rgba(255, 184, 101, 0.12) 0px, transparent 50%);
+            padding: 0;
+            margin: 0;
+            animation: fadeIn 0.6s ease-out;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            /* iOS-specific optimizations */
+            body {
+                min-height: -webkit-fill-available;
+                height: -webkit-fill-available;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 2rem;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure minimum touch target size for iOS */
+        button, .checklist-item {
+            min-height: 44px;
+        }
+
+        .screen {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .main-menu {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .menu-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideUp 0.8s ease-out backwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent-primary) 0px,
+                var(--accent-primary) 10px,
+                var(--accent-secondary) 10px,
+                var(--accent-secondary) 20px,
+                var(--accent-teal) 20px,
+                var(--accent-teal) 30px
+            );
+        }
+
+        .menu-btn:nth-child(1) { animation-delay: 0.3s; }
+        .menu-btn:nth-child(2) { animation-delay: 0.4s; }
+        .menu-btn:nth-child(3) { animation-delay: 0.5s; }
+        .menu-btn:nth-child(4) { animation-delay: 0.6s; }
+        .menu-btn:nth-child(5) { animation-delay: 0.7s; }
+
+        .menu-btn:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 24px rgba(255, 140, 66, 0.3);
+        }
+
+        .menu-btn-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+
+        .menu-btn-title {
+            font-family: 'Righteous', sans-serif;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            letter-spacing: 0.05em;
+        }
+
+        .menu-btn-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.938rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Archivo', sans-serif;
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1rem;
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateX(-4px);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.938rem;
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .extras-info {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .extras-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Flower Tracker Styles */
+        .flower-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .flower-display {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flower-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent-primary) 0px,
+                var(--accent-primary) 10px,
+                var(--accent-secondary) 10px,
+                var(--accent-secondary) 20px,
+                var(--accent-teal) 20px,
+                var(--accent-teal) 30px
+            );
+        }
+
+        .flower-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .flower-count {
+            font-family: 'Righteous', sans-serif;
+            font-size: 5rem;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(3px 3px 0px rgba(251, 46, 1, 0.4));
+            margin-bottom: 0.5rem;
+        }
+
+        .flower-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .flower-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .flower-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Archivo', sans-serif;
+        }
+
+        .flower-btn .btn-icon {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .flower-btn .btn-text {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .decrease-btn:hover {
+            border-color: var(--accent-red);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(251, 46, 1, 0.3);
+        }
+
+        .decrease-btn:hover .btn-icon,
+        .decrease-btn:hover .btn-text {
+            color: var(--accent-red);
+        }
+
+        .increase-btn:hover {
+            border-color: var(--accent-teal);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(111, 203, 159, 0.3);
+        }
+
+        .increase-btn:hover .btn-icon,
+        .increase-btn:hover .btn-text {
+            color: var(--accent-teal);
+        }
+
+        .flower-info {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .flower-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .nerd-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: 'Righteous', sans-serif;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .nerd-btn:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+        }
+
+        .data-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .export-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .import-btn:hover {
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+        }
+
+        /* Mental Health Styles */
+        .mood-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .mood-question {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'Righteous', sans-serif;
+            letter-spacing: 0.05em;
+        }
+
+        .mood-current {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mood-current::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent-primary) 0px,
+                var(--accent-primary) 10px,
+                var(--accent-secondary) 10px,
+                var(--accent-secondary) 20px,
+                var(--accent-teal) 20px,
+                var(--accent-teal) 30px
+            );
+        }
+
+        .mood-current-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-current-value {
+            font-family: 'Righteous', sans-serif;
+            font-size: 2rem;
+            color: var(--accent-primary);
+        }
+
+        .mood-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mood-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mood-btn:hover {
+            border-color: var(--accent-teal);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(111, 203, 159, 0.3);
+        }
+
+        .mood-btn.selected {
+            background: var(--accent-teal);
+            border-color: var(--accent-teal);
+        }
+
+        .mood-btn.selected .mood-emoji,
+        .mood-btn.selected .mood-label {
+            color: var(--bg-dark);
+        }
+
+        .mood-emoji {
+            font-size: 1.75rem;
+            line-height: 1;
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .mood-label {
+            font-size: 0.938rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            flex: 1;
+            text-align: left;
+        }
+
+        .mood-info {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mood-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .nerd-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nerd-tab {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'Archivo', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .nerd-tab.active {
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+            border-color: var(--accent-primary);
+        }
+
+        .nerd-tab:hover:not(.active) {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .graph-container {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent-primary) 0px,
+                var(--accent-primary) 10px,
+                var(--accent-secondary) 10px,
+                var(--accent-secondary) 20px,
+                var(--accent-teal) 20px,
+                var(--accent-teal) 30px
+            );
+        }
+
+        .graph-container canvas {
+            width: 100% !important;
+            height: 250px !important;
+        }
+
+        .data-list {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.938rem;
+        }
+
+        .data-item:last-child {
+            border-bottom: none;
+        }
+
+        .data-date {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .data-value {
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-family: 'Righteous', sans-serif;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.938rem;
+        }
+
+        .correlation-insight {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .correlation-insight p {
+            color: var(--text-secondary);
+            font-size: 0.938rem;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .correlation-insight p:last-child {
+            margin-bottom: 0;
+        }
+
+        .correlation-stat {
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-family: 'Righteous', sans-serif;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Righteous', sans-serif;
+            font-size: 4rem;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 40px rgba(255, 140, 66, 0.4);
+            filter: drop-shadow(2px 2px 0px rgba(251, 46, 1, 0.3));
+        }
+
+        .streak-display {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .streak-display::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            padding: 6px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--accent-primary) 0px,
+                var(--accent-primary) 10px,
+                var(--accent-secondary) 10px,
+                var(--accent-secondary) 20px,
+                var(--accent-teal) 20px,
+                var(--accent-teal) 30px
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Righteous', sans-serif;
+            font-size: 4rem;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(3px 3px 0px rgba(251, 46, 1, 0.4));
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .stat-divider {
+            width: 2px;
+            height: 60px;
+            background: var(--border);
+        }
+
+        .streak-number {
+            font-family: 'Righteous', sans-serif;
+            font-size: 6rem;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(3px 3px 0px rgba(251, 46, 1, 0.4));
+        }
+
+        .streak-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .last-completed {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: slideUp 0.8s ease-out backwards;
+        }
+
+        .section:nth-child(2) { animation-delay: 0.3s; }
+        .section:nth-child(3) { animation-delay: 0.4s; }
+        .section:nth-child(4) { animation-delay: 0.5s; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Righteous', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.1em;
+            flex: 1;
+        }
+
+        .master-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Righteous', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.1em;
+            outline: none;
+            flex: 1;
+        }
+
+        .add-item-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--accent-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+
+        .add-item-btn:hover {
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.4);
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .checklist-item.checked {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checklist-item.checked .checkbox {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .checkbox::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item.checked .checkbox::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .item-text {
+            flex: 1;
+            font-size: 0.938rem;
+            color: var(--text-primary);
+        }
+
+        .item-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            font-family: 'Archivo', sans-serif;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+
+        .checklist-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            color: var(--accent-red);
+        }
+
+        .complete-day-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: var(--bg-dark);
+            padding: 1.25rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: 'Righteous', sans-serif;
+            width: 100%;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 140, 66, 0.4);
+            animation: slideUp 0.8s ease-out 0.6s backwards;
+        }
+
+        .complete-day-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 140, 66, 0.5);
+        }
+
+        .complete-day-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-family: 'Archivo', sans-serif;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-divider {
+                width: 100%;
+                height: 1px;
+            }
+
+            .menu-btn {
+                padding: 1.5rem;
+            }
+
+            .menu-btn-icon {
+                font-size: 2.5rem;
+            }
+
+            .menu-btn-title {
+                font-size: 1.5rem;
+            }
+
+            .section {
+                padding: 1.25rem;
+            }
+
+            .complete-day-btn {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .flower-count {
+                font-size: 4rem;
+            }
+
+            .flower-icon {
+                font-size: 3rem;
+            }
+
+            .mood-emoji {
+                font-size: 1.5rem;
+            }
+
+            .mood-label {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Specific optimizations for iPhone 13 Pro Max and similar */
+        @media (max-width: 428px) and (min-height: 800px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                padding: 0.75rem 0.75rem 1rem;
+                height: 100vh;
+                height: -webkit-fill-available;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            header {
+                margin-bottom: 0.75rem;
+                flex-shrink: 0;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 0;
+            }
+
+            .subtitle {
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .streak-display {
+                padding: 1rem;
+                margin-bottom: 1rem;
+                flex-shrink: 0;
+            }
+
+            .stats-grid {
+                gap: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.688rem;
+                margin-top: 0.25rem;
+            }
+
+            .stat-divider {
+                height: 35px;
+            }
+
+            .last-completed {
+                font-size: 0.813rem;
+            }
+
+            .menu-buttons {
+                gap: 0.75rem;
+                margin-bottom: 0.75rem;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .menu-grid {
+                gap: 0.75rem;
+                flex: 1;
+            }
+
+            .menu-btn {
+                padding: 1rem 0.75rem;
+                gap: 0.5rem;
+                min-height: 0;
+            }
+
+            .menu-btn-icon {
+                font-size: 2rem;
+            }
+
+            .menu-btn-title {
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+
+            .menu-btn-desc {
+                font-size: 0.688rem;
+                line-height: 1.2;
+            }
+
+            .reset-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.813rem;
+                margin-top: 0;
+                flex-shrink: 0;
+            }
+
+            .section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .section-header {
+                padding-bottom: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .checklist-item {
+                padding: 0.875rem;
+                font-size: 0.938rem;
+            }
+
+            .item-input {
+                font-size: 0.938rem;
+            }
+
+            .complete-day-btn {
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+                margin-top: 1.5rem;
+            }
+
+            .flower-count {
+                font-size: 3rem;
+            }
+
+            .flower-display {
+                padding: 1.25rem;
+            }
+
+            .flower-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .flower-label {
+                font-size: 0.813rem;
+            }
+
+            .flower-controls {
+                gap: 1rem;
+            }
+
+            .flower-btn {
+                padding: 1.25rem;
+            }
+
+            .mood-container {
+                gap: 1.5rem;
+            }
+
+            .mood-current {
+                padding: 1.25rem;
+            }
+
+            .mood-current-value {
+                font-size: 1.75rem;
+            }
+
+            .mood-current-label {
+                font-size: 0.813rem;
+            }
+
+            .mood-question {
+                font-size: 1.25rem;
+            }
+
+            .mood-btn {
+                padding: 1rem 1.25rem;
+            }
+
+            .mood-emoji {
+                font-size: 1.5rem;
+                min-width: 1.75rem;
+            }
+
+            .mood-label {
+                font-size: 0.875rem;
+            }
+
+            .mood-scale {
+                gap: 0.75rem;
+            }
+
+            .back-btn {
+                bottom: 1rem;
+                left: 0.75rem;
+                padding: 0.75rem 1.25rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Confetti canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confettiCanvas"></canvas>
+    <div class="container">
+        <!-- Main Menu Screen -->
+        <div id="mainMenu" class="main-menu">
+            <header>
+                <h1>MOMENTUM MACHINE</h1>
+            </header>
+
+            <div class="streak-display">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="menuStreakNumber">0</div>
+                        <div class="stat-label">☀️ Day Streak</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="menuFlowerCount">0</div>
+                        <div class="stat-label">🌸 Flowers</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number mood-display" id="menuMoodDisplay">-</div>
+                        <div class="stat-label">🧠 Mood</div>
+                    </div>
+                </div>
+                <div class="last-completed" id="menuLastCompleted">Never completed</div>
+            </div>
+
+            <div class="menu-buttons">
+                <div class="menu-grid">
+                    <button class="menu-btn master-btn" id="masterListBtn">
+                        <div class="menu-btn-icon">📋</div>
+                        <div class="menu-btn-title">Master List</div>
+                        <div class="menu-btn-desc">Your daily essential tasks</div>
+                    </button>
+                    
+                    <button class="menu-btn extras-btn" id="dailyExtrasBtn">
+                        <div class="menu-btn-icon">✨</div>
+                        <div class="menu-btn-title">Daily Extras</div>
+                        <div class="menu-btn-desc">Side quests</div>
+                    </button>
+
+                    <button class="menu-btn flower-btn" id="flowerTrackerBtn">
+                        <div class="menu-btn-icon">🌻</div>
+                        <div class="menu-btn-title">Flower Tracker</div>
+                        <div class="menu-btn-desc">Track your garden</div>
+                    </button>
+
+                    <button class="menu-btn mood-btn" id="mentalHealthBtn">
+                        <div class="menu-btn-icon">🧠</div>
+                        <div class="menu-btn-title">Mental Health</div>
+                        <div class="menu-btn-desc">Check in with yourself</div>
+                    </button>
+                </div>
+
+                <button class="menu-btn nerd-btn-menu" id="nerdShitMenuBtn">
+                    <div class="menu-btn-icon">🤓</div>
+                    <div class="menu-btn-title">Nerd Shit</div>
+                    <div class="menu-btn-desc">View all your data</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Master List Screen -->
+        <div id="masterListScreen" class="screen" style="display: none;">
+            <header>
+                <button class="back-btn" id="backFromMaster">← Back</button>
+                <h1>MASTER LIST</h1>
+                <p class="subtitle">Your daily essential tasks - complete all to build your streak</p>
+            </header>
+
+            <div class="section master-section">
+                <div class="section-header">
+                    <h2 class="section-title">Daily Tasks</h2>
+                    <button class="add-item-btn" id="addMasterItem">+ Add Task</button>
+                </div>
+                <div class="checklist" id="masterChecklist"></div>
+            </div>
+
+            <button class="complete-day-btn" id="completeDayBtn">Complete Day</button>
+        </div>
+
+        <!-- Daily Extras Screen -->
+        <div id="dailyExtrasScreen" class="screen" style="display: none;">
+            <header>
+                <button class="back-btn" id="backFromExtras">← Back</button>
+                <h1>DAILY EXTRAS</h1>
+            </header>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Today's Extra Tasks</h2>
+                    <button class="add-item-btn" data-section="extras">+ Add Item</button>
+                </div>
+                <div class="checklist" data-section="extras"></div>
+            </div>
+
+            <div class="extras-info">
+                <p>✨ These tasks are just for today and won't affect your streak</p>
+                <p>🗑️ All items will be cleared at midnight</p>
+            </div>
+        </div>
+
+        <!-- Flower Tracker Screen -->
+        <div id="flowerTrackerScreen" class="screen" style="display: none;">
+            <header>
+                <button class="back-btn" id="backFromFlower">← Back</button>
+                <h1>FLOWER TRACKER</h1>
+            </header>
+
+            <div class="flower-container">
+                <div class="flower-display">
+                    <div class="flower-icon">🌺</div>
+                    <div class="flower-count" id="flowerCountDisplay">0</div>
+                    <div class="flower-label">Flowers</div>
+                </div>
+
+                <div class="flower-controls">
+                    <button class="flower-btn decrease-btn" id="decreaseFlower">
+                        <span class="btn-icon">−</span>
+                        <span class="btn-text">Remove</span>
+                    </button>
+                    <button class="flower-btn increase-btn" id="increaseFlower">
+                        <span class="btn-icon">+</span>
+                        <span class="btn-text">Add</span>
+                    </button>
+                </div>
+
+                <div class="flower-info">
+                    <p>🪴 Track your flower usage</p>
+                    <p>🌱 Use + and − to adjust your count</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mental Health Screen -->
+        <div id="mentalHealthScreen" class="screen" style="display: none;">
+            <header>
+                <button class="back-btn" id="backFromMood">← Back</button>
+                <h1>MENTAL HEALTH</h1>
+            </header>
+
+            <div class="mood-container">
+                <div class="mood-question">How are you feeling today?</div>
+                
+                <div class="mood-current" id="moodCurrent">
+                    <div class="mood-current-label">Current Mood</div>
+                    <div class="mood-current-value" id="moodCurrentValue">Not set</div>
+                </div>
+
+                <div class="mood-scale">
+                    <button class="mood-btn" data-mood="1">
+                        <div class="mood-emoji">🌑</div>
+                        <div class="mood-label">The world is ending</div>
+                    </button>
+                    <button class="mood-btn" data-mood="2">
+                        <div class="mood-emoji">😔</div>
+                        <div class="mood-label">Struggling</div>
+                    </button>
+                    <button class="mood-btn" data-mood="3">
+                        <div class="mood-emoji">😕</div>
+                        <div class="mood-label">Not great</div>
+                    </button>
+                    <button class="mood-btn" data-mood="4">
+                        <div class="mood-emoji">😐</div>
+                        <div class="mood-label">Okay</div>
+                    </button>
+                    <button class="mood-btn" data-mood="5">
+                        <div class="mood-emoji">🙂</div>
+                        <div class="mood-label">Pretty good</div>
+                    </button>
+                    <button class="mood-btn" data-mood="6">
+                        <div class="mood-emoji">😊</div>
+                        <div class="mood-label">Great</div>
+                    </button>
+                    <button class="mood-btn" data-mood="7">
+                        <div class="mood-emoji">✨</div>
+                        <div class="mood-label">Magical</div>
+                    </button>
+                </div>
+
+                <div class="mood-info">
+                    <p>🧠 Your mood gets saved at midnight</p>
+                    <p>💭 You can update it anytime throughout the day</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nerd Shit Screen -->
+        <div id="nerdShitScreen" class="screen" style="display: none;">
+            <header>
+                <button class="back-btn" id="backFromNerd">← Back</button>
+                <h1>NERD SHIT</h1>
+            </header>
+
+            <div class="nerd-tabs">
+                <button class="nerd-tab active" id="dailyTab">Last 30 Days</button>
+                <button class="nerd-tab" id="monthlyTab">Monthly Averages</button>
+                <button class="nerd-tab" id="correlationTab">Correlation</button>
+            </div>
+
+            <!-- Daily View -->
+            <div id="dailyView" class="nerd-view">
+                <div class="graph-container">
+                    <canvas id="dailyGraph"></canvas>
+                </div>
+                <div class="data-list" id="dailyList"></div>
+            </div>
+
+            <!-- Monthly View -->
+            <div id="monthlyView" class="nerd-view" style="display: none;">
+                <div class="graph-container">
+                    <canvas id="monthlyGraph"></canvas>
+                </div>
+                <div class="data-list" id="monthlyList"></div>
+            </div>
+
+            <!-- Correlation View -->
+            <div id="correlationView" class="nerd-view" style="display: none;">
+                <div class="graph-container">
+                    <canvas id="correlationGraph"></canvas>
+                </div>
+                <div class="correlation-insight" id="correlationInsight"></div>
+            </div>
+
+            <div class="data-controls">
+                <button class="nerd-tab export-btn" id="exportBtn">📤 Export</button>
+                <button class="nerd-tab import-btn" id="importBtn">📥 Import</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+
+            <button class="reset-btn" id="menuResetBtn">⚠️ Reset Streak</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize app state
+        let appState = {
+            masterItems: [],
+            dailyExtras: [],
+            streak: 0,
+            flowerCount: 0,
+            flowerDailyLog: [], // Last 30 days: [{date: 'YYYY-MM-DD', count: number}]
+            flowerMonthlyAverages: [], // [{month: 'YYYY-MM', average: number, daysLogged: number}]
+            moodScore: null, // Today's mood (1-7)
+            moodDailyLog: [], // Last 30 days: [{date: 'YYYY-MM-DD', score: number}]
+            moodMonthlyAverages: [], // [{month: 'YYYY-MM', average: number, daysLogged: number}]
+            lastCompletedDate: null,
+            todayCompleted: false,
+            lastExtrasResetDate: null,
+            lastFlowerLogDate: null,
+            lastMoodLogDate: null
+        };
+
+        let currentScreen = 'menu'; // 'menu', 'master', 'extras'
+
+        // Navigation functions
+        function showScreen(screen) {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('masterListScreen').style.display = 'none';
+            document.getElementById('dailyExtrasScreen').style.display = 'none';
+            document.getElementById('flowerTrackerScreen').style.display = 'none';
+            document.getElementById('mentalHealthScreen').style.display = 'none';
+            document.getElementById('nerdShitScreen').style.display = 'none';
+            
+            if (screen === 'menu') {
+                document.getElementById('mainMenu').style.display = 'block';
+                updateMenuUI();
+            } else if (screen === 'master') {
+                document.getElementById('masterListScreen').style.display = 'block';
+                updateMasterListUI();
+            } else if (screen === 'extras') {
+                document.getElementById('dailyExtrasScreen').style.display = 'block';
+                updateExtrasUI();
+            } else if (screen === 'flower') {
+                document.getElementById('flowerTrackerScreen').style.display = 'block';
+                updateFlowerUI();
+            } else if (screen === 'mood') {
+                document.getElementById('mentalHealthScreen').style.display = 'block';
+                updateMoodUI();
+            } else if (screen === 'nerd') {
+                document.getElementById('nerdShitScreen').style.display = 'block';
+                updateNerdUI();
+            }
+            
+            currentScreen = screen;
+        }
+
+        // Load state from localStorage
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('momentumMachineState');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState = { ...appState, ...parsed };
+                    
+                    // Check if we need to reset today's completion status
+                    const today = new Date().toDateString();
+                    const lastCompleted = appState.lastCompletedDate ? new Date(appState.lastCompletedDate).toDateString() : null;
+                    
+                    if (lastCompleted !== today) {
+                        // New day - reset all checkboxes and today's completion
+                        appState.todayCompleted = false;
+                        appState.masterItems.forEach(item => item.checked = false);
+                        
+                        // Check if streak should be broken
+                        if (lastCompleted) {
+                            const lastDate = new Date(appState.lastCompletedDate);
+                            const todayDate = new Date();
+                            todayDate.setHours(0, 0, 0, 0);
+                            lastDate.setHours(0, 0, 0, 0);
+                            
+                            const diffTime = todayDate - lastDate;
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            // If more than 1 day has passed, break the streak
+                            if (diffDays > 1) {
+                                appState.streak = 0;
+                            }
+                        }
+                    }
+
+                    // Check if we need to reset daily extras
+                    const lastExtrasReset = appState.lastExtrasResetDate ? new Date(appState.lastExtrasResetDate).toDateString() : null;
+                    if (lastExtrasReset !== today) {
+                        // Clear all daily extras
+                        appState.dailyExtras = [];
+                        appState.lastExtrasResetDate = new Date().toISOString();
+                    }
+
+                    // Check if we need to log yesterday's flower count
+                    const lastFlowerLog = appState.lastFlowerLogDate ? new Date(appState.lastFlowerLogDate).toDateString() : null;
+                    if (lastFlowerLog !== today && lastFlowerLog !== null) {
+                        // Log yesterday's flower count before resetting
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yesterdayStr = yesterday.toISOString().split('T')[0]; // YYYY-MM-DD
+                        
+                        appState.flowerDailyLog.push({
+                            date: yesterdayStr,
+                            count: appState.flowerCount
+                        });
+                        
+                        // Reset flower count for new day
+                        appState.flowerCount = 0;
+                    }
+                    
+                    // Update last log date
+                    appState.lastFlowerLogDate = new Date().toISOString();
+
+                    // Check if we need to log yesterday's mood
+                    const lastMoodLog = appState.lastMoodLogDate ? new Date(appState.lastMoodLogDate).toDateString() : null;
+                    if (lastMoodLog !== today && lastMoodLog !== null && appState.moodScore !== null) {
+                        // Log yesterday's mood before resetting
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yesterdayStr = yesterday.toISOString().split('T')[0]; // YYYY-MM-DD
+                        
+                        appState.moodDailyLog.push({
+                            date: yesterdayStr,
+                            score: appState.moodScore
+                        });
+                        
+                        // Reset mood for new day
+                        appState.moodScore = null;
+                    }
+                    
+                    // Update last mood log date
+                    appState.lastMoodLogDate = new Date().toISOString();
+                    
+                    // Compress old data (older than 30 days)
+                    compressOldFlowerData();
+                    compressOldMoodData();
+                }
+            } catch (e) {
+                console.error('Failed to load state:', e);
+            }
+        }
+
+        // Compress flower data older than 30 days into monthly averages
+        function compressOldFlowerData() {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            // Filter data to compress (older than 30 days)
+            const oldData = appState.flowerDailyLog.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate < thirtyDaysAgo;
+            });
+            
+            // Keep recent data (last 30 days)
+            appState.flowerDailyLog = appState.flowerDailyLog.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate >= thirtyDaysAgo;
+            });
+            
+            if (oldData.length === 0) return;
+            
+            // Group by month and calculate averages
+            const monthlyData = {};
+            oldData.forEach(entry => {
+                const month = entry.date.substring(0, 7); // YYYY-MM
+                if (!monthlyData[month]) {
+                    monthlyData[month] = { total: 0, count: 0 };
+                }
+                monthlyData[month].total += entry.count;
+                monthlyData[month].count++;
+            });
+            
+            // Update or create monthly averages
+            Object.keys(monthlyData).forEach(month => {
+                const average = monthlyData[month].total / monthlyData[month].count;
+                const existingIndex = appState.flowerMonthlyAverages.findIndex(m => m.month === month);
+                
+                if (existingIndex >= 0) {
+                    // Update existing month
+                    const existing = appState.flowerMonthlyAverages[existingIndex];
+                    const newTotal = existing.average * existing.daysLogged + monthlyData[month].total;
+                    const newDays = existing.daysLogged + monthlyData[month].count;
+                    appState.flowerMonthlyAverages[existingIndex] = {
+                        month: month,
+                        average: newTotal / newDays,
+                        daysLogged: newDays
+                    };
+                } else {
+                    // Create new month entry
+                    appState.flowerMonthlyAverages.push({
+                        month: month,
+                        average: average,
+                        daysLogged: monthlyData[month].count
+                    });
+                }
+            });
+            
+            // Sort monthly averages by date (newest first)
+            appState.flowerMonthlyAverages.sort((a, b) => b.month.localeCompare(a.month));
+        }
+
+        // Compress mood data older than 30 days into monthly averages
+        function compressOldMoodData() {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            // Filter data to compress (older than 30 days)
+            const oldData = appState.moodDailyLog.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate < thirtyDaysAgo;
+            });
+            
+            // Keep recent data (last 30 days)
+            appState.moodDailyLog = appState.moodDailyLog.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate >= thirtyDaysAgo;
+            });
+            
+            if (oldData.length === 0) return;
+            
+            // Group by month and calculate averages
+            const monthlyData = {};
+            oldData.forEach(entry => {
+                const month = entry.date.substring(0, 7); // YYYY-MM
+                if (!monthlyData[month]) {
+                    monthlyData[month] = { total: 0, count: 0 };
+                }
+                monthlyData[month].total += entry.score;
+                monthlyData[month].count++;
+            });
+            
+            // Update or create monthly averages
+            Object.keys(monthlyData).forEach(month => {
+                const average = monthlyData[month].total / monthlyData[month].count;
+                const existingIndex = appState.moodMonthlyAverages.findIndex(m => m.month === month);
+                
+                if (existingIndex >= 0) {
+                    // Update existing month
+                    const existing = appState.moodMonthlyAverages[existingIndex];
+                    const newTotal = existing.average * existing.daysLogged + monthlyData[month].total;
+                    const newDays = existing.daysLogged + monthlyData[month].count;
+                    appState.moodMonthlyAverages[existingIndex] = {
+                        month: month,
+                        average: newTotal / newDays,
+                        daysLogged: newDays
+                    };
+                } else {
+                    // Create new month entry
+                    appState.moodMonthlyAverages.push({
+                        month: month,
+                        average: average,
+                        daysLogged: monthlyData[month].count
+                    });
+                }
+            });
+            
+            // Sort monthly averages by date (newest first)
+            appState.moodMonthlyAverages.sort((a, b) => b.month.localeCompare(a.month));
+        }
+
+        // Update correlation view (placeholder - will show combined data)
+        function updateCorrelationView() {
+            const ctx = document.getElementById('correlationGraph').getContext('2d');
+            const insightEl = document.getElementById('correlationInsight');
+            
+            insightEl.innerHTML = '<div class="no-data">Correlation analysis coming soon! Track both flowers and mood for 7+ days to see patterns.</div>';
+            
+            // Simple message for now
+            if (appState.flowerDailyLog.length < 7 || appState.moodDailyLog.length < 7) {
+                return;
+            }
+            
+            insightEl.innerHTML = '<p>📊 Keep tracking to build correlations between your flower usage and mood!</p>';
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            try {
+                localStorage.setItem('momentumMachineState', JSON.stringify(appState));
+            } catch (e) {
+                console.error('Failed to save state:', e);
+            }
+        }
+
+        // Update Menu UI
+        function updateMenuUI() {
+            document.getElementById('menuStreakNumber').textContent = appState.streak;
+            document.getElementById('menuFlowerCount').textContent = appState.flowerCount;
+            
+            // Update mood display
+            const moodEmojis = {
+                1: '🌑',
+                2: '😔',
+                3: '😕',
+                4: '😐',
+                5: '🙂',
+                6: '😊',
+                7: '✨'
+            };
+            
+            if (appState.moodScore !== null) {
+                document.getElementById('menuMoodDisplay').textContent = moodEmojis[appState.moodScore];
+            } else {
+                document.getElementById('menuMoodDisplay').textContent = '-';
+            }
+            
+            const lastCompletedEl = document.getElementById('menuLastCompleted');
+            if (appState.lastCompletedDate) {
+                const date = new Date(appState.lastCompletedDate);
+                const today = new Date().toDateString();
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                
+                if (date.toDateString() === today) {
+                    lastCompletedEl.textContent = 'Completed today ✓';
+                } else if (date.toDateString() === yesterday) {
+                    lastCompletedEl.textContent = 'Last completed yesterday';
+                } else {
+                    lastCompletedEl.textContent = `Last completed ${date.toLocaleDateString()}`;
+                }
+            } else {
+                lastCompletedEl.textContent = 'Never completed';
+            }
+        }
+
+        // Update Master List UI
+        function updateMasterListUI() {
+            const container = document.getElementById('masterChecklist');
+            container.innerHTML = '';
+            
+            appState.masterItems.forEach((item, itemIdx) => {
+                const itemEl = createChecklistItem(item, itemIdx, 'master');
+                container.appendChild(itemEl);
+            });
+
+            // Update complete day button
+            updateCompleteDayButton();
+        }
+
+        // Update Daily Extras UI
+        function updateExtrasUI() {
+            const container = document.querySelector('#dailyExtrasScreen .checklist[data-section="extras"]');
+            container.innerHTML = '';
+            
+            appState.dailyExtras.forEach((item, itemIdx) => {
+                const itemEl = createChecklistItem(item, itemIdx, 'extras');
+                container.appendChild(itemEl);
+            });
+        }
+
+        // Update Flower UI
+        function updateFlowerUI() {
+            document.getElementById('flowerCountDisplay').textContent = appState.flowerCount;
+        }
+
+        // Update Mood UI
+        function updateMoodUI() {
+            const moodLabels = {
+                1: 'The world is ending',
+                2: 'Struggling',
+                3: 'Not great',
+                4: 'Okay',
+                5: 'Pretty good',
+                6: 'Great',
+                7: 'Magical'
+            };
+            
+            const moodEmojis = {
+                1: '🌑',
+                2: '😔',
+                3: '😕',
+                4: '😐',
+                5: '🙂',
+                6: '😊',
+                7: '✨'
+            };
+            
+            // Update current mood display
+            if (appState.moodScore !== null) {
+                document.getElementById('moodCurrentValue').textContent = 
+                    moodEmojis[appState.moodScore] + ' ' + moodLabels[appState.moodScore];
+            } else {
+                document.getElementById('moodCurrentValue').textContent = 'Not set';
+            }
+            
+            // Update button states
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                const mood = parseInt(btn.dataset.mood);
+                if (mood === appState.moodScore) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        // Update Nerd UI
+        let dailyChart = null;
+        let monthlyChart = null;
+
+        function updateNerdUI() {
+            updateDailyView();
+            updateMonthlyView();
+        }
+
+        function updateDailyView() {
+            // Update daily list
+            const dailyList = document.getElementById('dailyList');
+            if (appState.flowerDailyLog.length === 0) {
+                dailyList.innerHTML = '<div class="no-data">No data yet. Start tracking to see your history!</div>';
+            } else {
+                dailyList.innerHTML = appState.flowerDailyLog
+                    .slice()
+                    .reverse()
+                    .map(entry => {
+                        const date = new Date(entry.date);
+                        const formatted = date.toLocaleDateString('en-AU', { month: 'short', day: 'numeric' });
+                        return `
+                            <div class="data-item">
+                                <span class="data-date">${formatted}</span>
+                                <span class="data-value">🌸 ${entry.count}</span>
+                            </div>
+                        `;
+                    })
+                    .join('');
+            }
+            
+            // Update daily graph
+            const ctx = document.getElementById('dailyGraph').getContext('2d');
+            
+            if (dailyChart) {
+                dailyChart.destroy();
+            }
+            
+            if (appState.flowerDailyLog.length === 0) {
+                return;
+            }
+            
+            const labels = appState.flowerDailyLog.map(entry => {
+                const date = new Date(entry.date);
+                return date.toLocaleDateString('en-AU', { month: 'short', day: 'numeric' });
+            });
+            
+            const data = appState.flowerDailyLog.map(entry => entry.count);
+            
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Flowers',
+                        data: data,
+                        borderColor: '#ff8c42',
+                        backgroundColor: 'rgba(255, 140, 66, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#ff8c42',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#ffe28a',
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(255, 226, 138, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffe28a',
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                color: 'rgba(255, 226, 138, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateMonthlyView() {
+            // Update monthly list
+            const monthlyList = document.getElementById('monthlyList');
+            if (appState.flowerMonthlyAverages.length === 0) {
+                monthlyList.innerHTML = '<div class="no-data">No monthly data yet. Data will appear here after 30 days!</div>';
+            } else {
+                monthlyList.innerHTML = appState.flowerMonthlyAverages
+                    .map(entry => {
+                        const date = new Date(entry.month + '-01');
+                        const formatted = date.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+                        return `
+                            <div class="data-item">
+                                <span class="data-date">${formatted}</span>
+                                <span class="data-value">🌸 ${entry.average.toFixed(1)} avg</span>
+                            </div>
+                        `;
+                    })
+                    .join('');
+            }
+            
+            // Update monthly graph
+            const ctx = document.getElementById('monthlyGraph').getContext('2d');
+            
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+            
+            if (appState.flowerMonthlyAverages.length === 0) {
+                return;
+            }
+            
+            const labels = appState.flowerMonthlyAverages
+                .slice()
+                .reverse()
+                .map(entry => {
+                    const date = new Date(entry.month + '-01');
+                    return date.toLocaleDateString('en-AU', { month: 'short', year: 'numeric' });
+                });
+            
+            const data = appState.flowerMonthlyAverages
+                .slice()
+                .reverse()
+                .map(entry => entry.average);
+            
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Monthly Average',
+                        data: data,
+                        backgroundColor: '#6fcb9f',
+                        borderColor: '#6fcb9f',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#ffe28a'
+                            },
+                            grid: {
+                                color: 'rgba(255, 226, 138, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffe28a'
+                            },
+                            grid: {
+                                color: 'rgba(255, 226, 138, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create checklist item element
+        function createChecklistItem(item, itemIdx, type) {
+            const div = document.createElement('div');
+            div.className = `checklist-item ${item.checked ? 'checked' : ''}`;
+            
+            div.innerHTML = `
+                <div class="checkbox"></div>
+                <input type="text" class="item-input" value="${item.text}" data-item="${itemIdx}" data-type="${type}">
+                <button class="delete-btn" data-item="${itemIdx}" data-type="${type}">×</button>
+            `;
+            
+            // Toggle checkbox
+            div.addEventListener('click', (e) => {
+                if (e.target.classList.contains('item-input') || e.target.classList.contains('delete-btn')) {
+                    return;
+                }
+                item.checked = !item.checked;
+                saveState();
+                if (type === 'master') {
+                    updateMasterListUI();
+                } else {
+                    updateExtrasUI();
+                }
+            });
+            
+            // Edit item text
+            const input = div.querySelector('.item-input');
+            input.addEventListener('change', (e) => {
+                item.text = e.target.value;
+                saveState();
+            });
+            
+            // Delete item
+            const deleteBtn = div.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (type === 'master') {
+                    appState.masterItems.splice(itemIdx, 1);
+                    updateMasterListUI();
+                } else {
+                    appState.dailyExtras.splice(itemIdx, 1);
+                    updateExtrasUI();
+                }
+                saveState();
+            });
+            
+            return div;
+        }
+
+        // Add item to master list
+        document.getElementById('addMasterItem').addEventListener('click', () => {
+            appState.masterItems.push({
+                text: 'New task',
+                checked: false
+            });
+            saveState();
+            updateMasterListUI();
+        });
+
+        // Add item to extras
+        document.querySelectorAll('.add-item-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const sectionAttr = e.target.dataset.section;
+                
+                if (sectionAttr === 'extras') {
+                    appState.dailyExtras.push({
+                        text: 'New task',
+                        checked: false
+                    });
+                    saveState();
+                    updateExtrasUI();
+                }
+            });
+        });
+
+        // Check if all master list items are checked
+        function allItemsChecked() {
+            if (appState.masterItems.length === 0) return false;
+            return appState.masterItems.every(item => item.checked);
+        }
+
+        // Update complete day button state
+        function updateCompleteDayButton() {
+            const btn = document.getElementById('completeDayBtn');
+            const canComplete = allItemsChecked() && !appState.todayCompleted;
+            btn.disabled = !canComplete;
+            
+            if (appState.todayCompleted) {
+                btn.textContent = 'Day Already Completed ✓';
+            } else if (allItemsChecked()) {
+                btn.textContent = 'Complete Day';
+            } else {
+                btn.textContent = 'Complete All Tasks First';
+            }
+        }
+
+        // Complete day
+        document.getElementById('completeDayBtn').addEventListener('click', () => {
+            if (!allItemsChecked() || appState.todayCompleted) return;
+            
+            const today = new Date();
+            const todayStr = today.toDateString();
+            const lastCompletedStr = appState.lastCompletedDate ? new Date(appState.lastCompletedDate).toDateString() : null;
+            
+            if (lastCompletedStr) {
+                const yesterday = new Date(Date.now() - 86400000).toDateString();
+                if (lastCompletedStr === yesterday) {
+                    appState.streak++;
+                } else if (lastCompletedStr !== todayStr) {
+                    appState.streak = 1;
+                }
+            } else {
+                appState.streak = 1;
+            }
+            
+            appState.lastCompletedDate = today.toISOString();
+            appState.todayCompleted = true;
+            
+            saveState();
+            updateMasterListUI();
+            
+            // Confetti celebration!
+            launchConfetti();
+        });
+
+        // Confetti animation
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const confettiCount = 500;
+            const confetti = [];
+            const colors = ['#ff8c42', '#ffb865', '#6fcb9f', '#ffe28a', '#fb2e01'];
+            
+            // Random encouraging phrases
+            const phrases = [
+                'good stuff broheim',
+                'another juan',
+                'only 29,200 to go!',
+                'haters gon hate',
+                'players gon play',
+                '67',
+                'Jesus is thy saviour',
+                'absolutely legendary',
+                'crushing it king',
+                'built different fr',
+                'momentum acquired',
+                'we so back',
+                'unstoppable force detected',
+                'simply built better',
+                'another W',
+                'no days off mentality',
+                'lock in szn',
+                'godspeed soldier',
+                'the grind continues',
+                'real ones know',
+                'too powerful',
+                'main character energy',
+                'unfathomably based',
+                'certified banger',
+                'peak performance unlocked',
+                'excellence is habit',
+                'stay dangerous',
+                'different breed',
+                'touch grass? nah touch goals',
+                'sigma grindset activated',
+                'that\'s what i\'m talking about',
+                'absolute cinema',
+                'you love to see it',
+                'nothing but net',
+                'certified classic',
+                'hall of fame behavior',
+                'goated with the sauce',
+                'no cap detected',
+                'rent free in success\'s head',
+                'the prophecy continues',
+                'built by wolves',
+                'raised by machines',
+                'living rent free',
+                'simply unmatched',
+                'actual demon time',
+                'certified menace',
+                'can\'t be stopped won\'t be stopped',
+                'the legend grows',
+                'generational talent',
+                'caught in 4k being awesome',
+                'touched by greatness',
+                'real recognizes real',
+                'another day another slay',
+                'vibes immaculate',
+                'energy unmatched',
+                'aura radiating',
+                'the streak lives on'
+            ];
+            
+            // Pick random phrase
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            
+            class ConfettiPiece {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = -20;
+                    this.size = Math.random() * 8 + 4;
+                    this.speedY = Math.random() * 1.5 + 1; // Slower drop
+                    this.speedX = Math.random() * 2 - 1;
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                    this.rotation = Math.random() * 360;
+                    this.rotationSpeed = Math.random() * 10 - 5;
+                    this.gravity = 0.03; // Reduced gravity for slower fall
+                }
+                
+                update() {
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    this.speedY += this.gravity;
+                    this.rotation += this.rotationSpeed;
+                }
+                
+                draw() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation * Math.PI / 180);
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                    ctx.restore();
+                }
+            }
+            
+            // Create confetti pieces
+            for (let i = 0; i < confettiCount; i++) {
+                confetti.push(new ConfettiPiece());
+            }
+            
+            // Animation loop
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                let activeConfetti = 0;
+                confetti.forEach(piece => {
+                    piece.update();
+                    piece.draw();
+                    if (piece.y < canvas.height) {
+                        activeConfetti++;
+                    }
+                });
+                
+                if (activeConfetti > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    canvas.style.display = 'none';
+                }
+            }
+            
+            animate();
+            
+            // Show the random phrase
+            setTimeout(() => {
+                alert('🎉 ' + randomPhrase + '\n\nStreak: ' + appState.streak + ' days!');
+                showScreen('menu');
+            }, 1000);
+        }
+
+        // Reset streak
+        document.getElementById('menuResetBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset your streak?')) {
+                appState.streak = 0;
+                appState.lastCompletedDate = null;
+                appState.todayCompleted = false;
+                saveState();
+                updateMenuUI();
+            }
+        });
+
+        // Navigation buttons
+        document.getElementById('masterListBtn').addEventListener('click', () => {
+            showScreen('master');
+        });
+
+        document.getElementById('dailyExtrasBtn').addEventListener('click', () => {
+            showScreen('extras');
+        });
+
+        document.getElementById('flowerTrackerBtn').addEventListener('click', () => {
+            showScreen('flower');
+        });
+
+        document.getElementById('backFromMaster').addEventListener('click', () => {
+            showScreen('menu');
+        });
+
+        document.getElementById('backFromExtras').addEventListener('click', () => {
+            showScreen('menu');
+        });
+
+        document.getElementById('backFromFlower').addEventListener('click', () => {
+            showScreen('menu');
+        });
+
+        document.getElementById('mentalHealthBtn').addEventListener('click', () => {
+            showScreen('mood');
+        });
+
+        document.getElementById('backFromMood').addEventListener('click', () => {
+            showScreen('menu');
+        });
+
+        document.getElementById('nerdShitMenuBtn').addEventListener('click', () => {
+            showScreen('nerd');
+        });
+
+        document.getElementById('backFromNerd').addEventListener('click', () => {
+            showScreen('menu');
+        });
+
+        // Export data
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            const date = new Date().toISOString().split('T')[0];
+            link.download = `momentum-machine-backup-${date}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Import data
+        document.getElementById('importBtn').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    
+                    // Validate that it's our data structure
+                    if (importedData && typeof importedData === 'object') {
+                        // Merge with defaults to ensure all properties exist
+                        appState = {
+                            masterItems: [],
+                            dailyExtras: [],
+                            streak: 0,
+                            flowerCount: 0,
+                            flowerDailyLog: [],
+                            flowerMonthlyAverages: [],
+                            moodScore: null,
+                            moodDailyLog: [],
+                            moodMonthlyAverages: [],
+                            lastCompletedDate: null,
+                            todayCompleted: false,
+                            lastExtrasResetDate: null,
+                            lastFlowerLogDate: null,
+                            lastMoodLogDate: null,
+                            ...importedData
+                        };
+                        
+                        saveState();
+                        alert('✅ Data imported successfully!');
+                        showScreen('menu');
+                    } else {
+                        alert('❌ Invalid data file');
+                    }
+                } catch (error) {
+                    alert('❌ Error importing data: ' + error.message);
+                }
+                
+                // Reset file input
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        });
+
+        // Mood button handlers
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mood = parseInt(btn.dataset.mood);
+                appState.moodScore = mood;
+                saveState();
+                updateMoodUI();
+                updateMenuUI();
+            });
+        });
+
+        // Nerd tabs
+        document.getElementById('dailyTab').addEventListener('click', () => {
+            document.getElementById('dailyTab').classList.add('active');
+            document.getElementById('monthlyTab').classList.remove('active');
+            document.getElementById('correlationTab').classList.remove('active');
+            document.getElementById('dailyView').style.display = 'block';
+            document.getElementById('monthlyView').style.display = 'none';
+            document.getElementById('correlationView').style.display = 'none';
+        });
+
+        document.getElementById('monthlyTab').addEventListener('click', () => {
+            document.getElementById('monthlyTab').classList.add('active');
+            document.getElementById('dailyTab').classList.remove('active');
+            document.getElementById('correlationTab').classList.remove('active');
+            document.getElementById('monthlyView').style.display = 'block';
+            document.getElementById('dailyView').style.display = 'none';
+            document.getElementById('correlationView').style.display = 'none';
+        });
+
+        document.getElementById('correlationTab').addEventListener('click', () => {
+            document.getElementById('correlationTab').classList.add('active');
+            document.getElementById('dailyTab').classList.remove('active');
+            document.getElementById('monthlyTab').classList.remove('active');
+            document.getElementById('correlationView').style.display = 'block';
+            document.getElementById('dailyView').style.display = 'none';
+            document.getElementById('monthlyView').style.display = 'none';
+            updateCorrelationView();
+        });
+
+        // Flower tracker controls
+        document.getElementById('increaseFlower').addEventListener('click', () => {
+            appState.flowerCount++;
+            saveState();
+            updateFlowerUI();
+            updateMenuUI();
+        });
+
+        document.getElementById('decreaseFlower').addEventListener('click', () => {
+            if (appState.flowerCount > 0) {
+                appState.flowerCount--;
+                saveState();
+                updateFlowerUI();
+                updateMenuUI();
+            }
+        });
+
+        // Initialize
+        loadState();
+        showScreen('menu');
+    </script>
+</body>
+</html>
